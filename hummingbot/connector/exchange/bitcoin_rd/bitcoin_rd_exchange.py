@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 s_logger = None
 
 
-class bitcoin_rdExchange(ExchangePyBase):
+class BitcoinRDExchange(ExchangePyBase):
     UPDATE_ORDER_STATUS_MIN_INTERVAL = 10.0
 
     web_utils = web_utils
@@ -527,8 +527,8 @@ class bitcoin_rdExchange(ExchangePyBase):
 
         resp_json = await self._api_request(
             method=RESTMethod.GET,
-            path_url=CONSTANTS.TICKER_PRICE_CHANGE_PATH_URL,
+            path_url=CONSTANTS.TICKER_PATH,
             params=params
         )
 
-        return float(resp_json["lastPrice"])
+        return float(resp_json["last"])
