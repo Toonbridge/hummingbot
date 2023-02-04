@@ -219,13 +219,13 @@ class BitcoinRDExchange(ExchangePyBase):
             "id": order_id,
             "side": side,
             "symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair),
-            "orderType": order_type_str,
-            "orderPrice": str(price),
+            "type": order_type_str,
+            "price": str(price),
         }
         if order_type is OrderType.LIMIT_MAKER:
             data["postOnly"] = True
         exchange_order = await self._api_post(
-            path_url=CONSTANTS.ORDER_PATH_URL,
+            path_url=CONSTANTS.CREATE_ORDER,
             data=data,
             is_auth_required=True,
         )
@@ -243,14 +243,11 @@ class BitcoinRDExchange(ExchangePyBase):
         This implementation specific function is called by _cancel, and returns True if successful
         """
         exchange_order_id = await tracked_order.get_exchange_order_id()
-        timestamp = utils.get_ms_timestamp()
         data = {
-            "time": timestamp,
-            "orderId": exchange_order_id,
-            "symbol": await self.exchange_symbol_associated_to_pair(trading_pair=tracked_order.trading_pair),
+            "order_id": exchange_order_id,
         }
         cancel_result = await self._api_delete(
-            path_url=CONSTANTS.ORDER_PATH_URL,
+            path_url=CONSTANTS.CANCEL_ORDER,
             data=data,
             is_auth_required=True,
         )
@@ -273,7 +270,7 @@ class BitcoinRDExchange(ExchangePyBase):
                 # Refer to https://BitcoinRD.github.io/BitcoinRD-pro-api/#channel-order-and-balance
                 if acct_type == CONSTANTS.ACCOUNT_TYPE and event_subject == CONSTANTS.ORDER_CHANGE_EVENT_TYPE:
                     order_event_type = execution_data["st"]
-                    order_id: Optional[str] = execution_data.get("orderId")
+                    order_id: Optional[str] = execution_data.get("order_id")
                     event_timestamp = execution_data["t"] * 1e-3
                     updated_status = CONSTANTS.ORDER_STATE[order_event_type]
 

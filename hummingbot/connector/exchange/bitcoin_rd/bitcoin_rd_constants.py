@@ -26,6 +26,7 @@ ORDERBOOKS_PATH = "/orderbooks"
 TRADES_PATH = "/trades"
 CHART_PATH = "/chart"
 CHARTS_PATH = "/charts"
+EXCHANGE_NAME = "BitcoinRD"
 
 # Private API endpoints for BitcoinRD function
 

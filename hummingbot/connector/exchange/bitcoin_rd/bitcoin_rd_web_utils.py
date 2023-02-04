@@ -35,24 +35,24 @@ def get_hb_id_headers() -> Dict[str, Any]:
     }
 
 
-def public_rest_url(path_url: str, domain: str = CONSTANTS.DEFAULT_DOMAIN) -> str:
+def public_rest_url(path_url: str) -> str:
     """
     Creates a full URL for provided private REST endpoint
     :param path_url: a private REST endpoint
     :param domain: domain to connect to
     :return: the full URL to the endpoint
     """
-    return CONSTANTS.PUBLIC_REST_URL + path_url
+    return CONSTANTS.REST_URL + path_url
 
 
-def private_rest_url(path_url: str, domain: str = CONSTANTS.DEFAULT_DOMAIN) -> str:
+def private_rest_url(path_url: str) -> str:
     """
     Creates a full URL for provided private REST endpoint
     :param path_url: a private REST endpoint
     :param domain: the domain to connect to
     :return: None, we use overwrite_url instead
     """
-    return CONSTANTS.PRIVATE_REST_URL + path_url
+    return CONSTANTS.REST_URL + path_url
 
 
 def build_api_factory(
