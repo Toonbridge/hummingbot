@@ -30,9 +30,8 @@ class BitcoinRDAuth(AuthBase):
         headers = {}
         if request.headers is not None:
             headers.update(request.headers)
-        headers.update(self.header_for_authentication())
+        headers.update(self.auth_me(request.endpoint_url, request.method))
         request.headers = headers
-
         return request
 
     async def ws_authenticate(self, request: WSRequest) -> WSRequest:
@@ -52,14 +51,20 @@ class BitcoinRDAuth(AuthBase):
         signature = hmac.new(self.secret_key.encode(),string_to_encode.encode(),hashlib.sha256).hexdigest()
         return signature
 
-    def init_signature(self, PATH_URL, METHOD):
-        method = METHOD
-        path = f"/v2/user/{PATH_URL}"
-        api_expires = self.get_api_expires()
-        return method, path, api_expires
+    def init_signature(self, PATH_URL, METHOD, is_ws):
+        if is_ws:
+            method = "CONNECT"
+            path = '/stream'
+            api_expires = self.get_api_expires()
+            return method, path, api_expires
+        else:   
+            method = METHOD
+            path = f"/v2/user{PATH_URL}"
+            api_expires = self.get_api_expires()
+            return method, path, api_expires
 
-    def auth_me(self, PATH_URL, METHOD):
-        method, path, api_expires = self.init_signature(PATH_URL, METHOD)
+    def auth_me(self, PATH_URL, METHOD, is_ws=False):
+        method, path, api_expires = self.init_signature(PATH_URL, METHOD, is_ws)
         api_expires = self.get_api_expires()
         signature = self.generate_signature(PATH_URL, METHOD, api_expires)
         headers = {

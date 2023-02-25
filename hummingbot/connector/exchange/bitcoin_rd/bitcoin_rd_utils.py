@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Any, Dict
 
 from pydantic import Field, SecretStr
-
+import time
 from hummingbot.client.config.config_data_types import BaseConnectorConfigMap, ClientFieldData
 from hummingbot.core.data_type.trade_fee import TradeFeeSchema
 
@@ -23,6 +23,15 @@ def is_exchange_information_valid(exchange_info: Dict[str, Any]) -> bool:
     """
     return exchange_info.get("status", None) == "TRADING" and "SPOT" in exchange_info.get("permissions", list())
 
+def _time():
+    """
+    Private function created just to have a method that can be safely patched during unit tests and make tests
+    independent from real time
+    """
+    return time.time()
+
+def get_ms_timestamp() -> int:
+    return int(_time() * 1e3)
 
 class BitcoinRDConfigMap(BaseConnectorConfigMap):
     connector: str = Field(default="bitcoin_rd", const=True, client_data=None)

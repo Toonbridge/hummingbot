@@ -25,17 +25,16 @@ class BitcoinRDAPIUserStreamDataSource(UserStreamTrackerDataSource):
         api_factory: WebAssistantsFactory,
     ):
         super().__init__()
-        self._ascend_ex_auth: BitcoinRDAuth = auth
+        self._bitcoin_rd_auth: BitcoinRDAuth = auth
         self._api_factory = api_factory
         self._trading_pairs = trading_pairs or []
         self._connector = connector
         self._last_ws_message_sent_timestamp = 0
 
     async def _connected_websocket_assistant(self) -> WSAssistant:
-        group_id = self._connector.ascend_ex_group_id
-        headers = self._ascend_ex_auth.get_auth_headers(CONSTANTS.STREAM_PATH_URL)
-        ws_url = f"{CONSTANTS.PRIVATE_WS_URL.format(group_id=group_id)}/{CONSTANTS.STREAM_PATH_URL}"
-
+        group_id = self._connector.bitcoin_rd_group_id
+        headers = self._bitcoin_rd_auth.auth_me("ok", "ok", is_ws=True)
+        ws_url = f"{CONSTANTS.WS_URL}"
         ws: WSAssistant = await self._api_factory.get_ws_assistant()
         await ws.connect(ws_url=ws_url, ws_headers=headers)
         return ws
@@ -49,9 +48,7 @@ class BitcoinRDAPIUserStreamDataSource(UserStreamTrackerDataSource):
         try:
             payload = {"op": CONSTANTS.SUB_ENDPOINT_NAME, "ch": "order:cash"}
             subscribe_request: WSJSONRequest = WSJSONRequest(payload)
-
             await websocket_assistant.send(subscribe_request)
-
             self._last_ws_message_sent_timestamp = self._time()
             self.logger().info("Subscribed to private order changes and balance updates channels...")
         except asyncio.CancelledError:

@@ -63,7 +63,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             for trading_pair in self._trading_pairs:
                 trading_symbol = await self._connector.exchange_symbol_associated_to_pair(trading_pair=trading_pair)
                 for topic in [CONSTANTS.DIFF_TOPIC_ID, CONSTANTS.TRADE_TOPIC_ID]:
-                    payload = {"op": CONSTANTS.SUB_ENDPOINT_NAME, "ch": f"{topic}:{trading_symbol}"}
+                    payload = {"op": CONSTANTS.SUB_ENDPOINT_NAME, "args": f"{topic}:{trading_symbol}"}
                     await ws.send(WSJSONRequest(payload=payload))
 
             self.logger().info("Subscribed to public order book and trade channels...")

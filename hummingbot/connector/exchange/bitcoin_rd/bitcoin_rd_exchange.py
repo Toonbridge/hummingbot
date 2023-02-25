@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from bidict import bidict
-
+import time
 from hummingbot.connector.constants import s_decimal_NaN
 from hummingbot.connector.exchange.bitcoin_rd import (
     bitcoin_rd_constants as CONSTANTS,
@@ -125,11 +125,11 @@ class BitcoinRDExchange(ExchangePyBase):
         :return: the response from the tickers endpoint
         """
         symbol_to_trading_pair_map = await self.trading_pair_symbol_map()
-        pairs_prices = await self._api_get(path_url=CONSTANTS.TICKER_PATH)
+        pairs_prices = await self._api_get(path_url=CONSTANTS.TICKERS_PATH)
         spot_valid_token_entries = [
-            data_dict for data_dict in pairs_prices["data"] if data_dict["symbol"] in symbol_to_trading_pair_map
+            data_dict for data_dict in pairs_prices if data_dict in symbol_to_trading_pair_map
         ]
-        pairs_prices["data"] = spot_valid_token_entries
+        pairs_prices = spot_valid_token_entries
         return pairs_prices
 
     def _is_request_exception_related_to_time_synchronizer(self, request_exception: Exception):
@@ -172,12 +172,14 @@ class BitcoinRDExchange(ExchangePyBase):
         price: Decimal = s_decimal_NaN,
         is_maker: Optional[bool] = None,
     ) -> AddedToCostTradeFee:
-
+        fee_type = "taker"
         is_maker = is_maker or (order_type is OrderType.LIMIT_MAKER)
+        if is_maker:
+            fee_type = "maker"
         trading_pair = combine_to_hb_trading_pair(base=base_currency, quote=quote_currency)
-        if trading_pair in self._trading_fees:
+        if trading_pair in self._trading_fees[fee_type]:
             fees_data = self._trading_fees[trading_pair]
-            fee_value = Decimal(fees_data["maker"]) if is_maker else Decimal(fees_data["taker"])
+            fee_value = Decimal(fees_data["maker"][trading_pair]) if is_maker else Decimal(fees_data["taker"][trading_pair])
             fee = AddedToCostTradeFee(percent=fee_value)
         else:
             fee = build_trade_fee(
@@ -215,7 +217,7 @@ class BitcoinRDExchange(ExchangePyBase):
         timestamp = utils.get_ms_timestamp()
         data = {
             "time": timestamp,
-            "orderQty": str(amount),
+            "size": str(amount),
             "id": order_id,
             "side": side,
             "symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair),
@@ -223,7 +225,7 @@ class BitcoinRDExchange(ExchangePyBase):
             "price": str(price),
         }
         if order_type is OrderType.LIMIT_MAKER:
-            data["postOnly"] = True
+            data["meta.post_only"] = True
         exchange_order = await self._api_post(
             path_url=CONSTANTS.CREATE_ORDER,
             data=data,
@@ -232,8 +234,8 @@ class BitcoinRDExchange(ExchangePyBase):
 
         if exchange_order.get("code") == 0:
             return (
-                str(exchange_order["data"]["info"]["orderId"]),
-                int(exchange_order["data"]["info"]["timestamp"]) * 1e-3,
+                str(exchange_order["id"]),
+                time.time(),
             )
         else:
             raise IOError(str(exchange_order))
@@ -360,13 +362,13 @@ class BitcoinRDExchange(ExchangePyBase):
         local_asset_names = set(self._account_balances.keys())
         remote_asset_names = set()
 
-        response = await self._api_get(path_url=CONSTANTS.BALANCE_PATH_URL, is_auth_required=True)
+        response = await self._api_get(path_url=CONSTANTS.GET_BALANCE_PATH, is_auth_required=True)
 
-        if response.get("code") == 0:
-            for balance_entry in response["data"]:
-                asset_name = balance_entry["asset"]
-                self._account_available_balances[asset_name] = Decimal(balance_entry["availableBalance"])
-                self._account_balances[asset_name] = Decimal(balance_entry["totalBalance"])
+        if True:
+            for balance_entry in response:
+                asset_name = balance_entry.split("_")[0]
+                self._account_available_balances[asset_name] = Decimal(response[f"{asset_name}_available"])
+                self._account_balances[asset_name] = Decimal(balance_entry[f"{asset_name}_balance"])
                 remote_asset_names.add(asset_name)
 
             asset_names_to_remove = local_asset_names.difference(remote_asset_names)
@@ -399,18 +401,16 @@ class BitcoinRDExchange(ExchangePyBase):
 
     async def _update_trading_fees(self):
         resp = await self._api_get(
-            path_url=CONSTANTS.FEE_PATH_URL,
+            path_url=CONSTANTS.TIERS_PATH,
             is_auth_required=True,
         )
-        fees_json = resp.get("data", {}).get("fees", [])
-        for fee_json in fees_json:
-            try:
-                trading_pair = await self.trading_pair_associated_to_exchange_symbol(symbol=fee_json["symbol"])
-                self._trading_fees[trading_pair] = fee_json["fee"]
-            except asyncio.CancelledError:
-                raise
-            except Exception:
-                pass
+        fees_json = resp.get("1", {}).get("fees", [])
+        try:
+            self._trading_fees = fees_json
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            pass
 
     async def _all_trade_updates_for_order(self, order: InFlightOrder) -> List[TradeUpdate]:
         # BitcoinRD does not have an endpoint to retrieve trades for a particular order
@@ -477,8 +477,8 @@ class BitcoinRDExchange(ExchangePyBase):
             if "order" in result:
                 for order_fill_data in result["order"]:
                     max_sequence_number = max(max_sequence_number, order_fill_data["sn"])
-                    if order_fill_data["orderId"] in orders_to_process:
-                        order_id = order_fill_data["orderId"]
+                    if order_fill_data["order_id"] in orders_to_process:
+                        order_id = order_fill_data["order_id"]
                         try:
                             trade_update = self._trade_update_from_fill_data(
                                 fill_data=order_fill_data, order=orders_to_process[order_id]
@@ -522,19 +522,19 @@ class BitcoinRDExchange(ExchangePyBase):
 
     async def _request_order_status(self, tracked_order: InFlightOrder) -> OrderUpdate:
         exchange_order_id = await tracked_order.get_exchange_order_id()
-        params = {"orderId": exchange_order_id}
+        params = {"order_id": exchange_order_id}
         updated_order_data = await self._api_get(
-            path_url=CONSTANTS.ORDER_STATUS_PATH_URL, params=params, is_auth_required=True
+            path_url=CONSTANTS.GET_ORDER, params=params, is_auth_required=True
         )
 
         if updated_order_data.get("code") == 0:
-            order_update_data = updated_order_data["data"]
+            order_update_data = updated_order_data
             ordered_state = order_update_data["status"]
-            new_state = CONSTANTS.ORDER_STATE[ordered_state]
+            new_state = CONSTANTS.ORDER_STATE[ordered_state.upper()]
 
             order_update = OrderUpdate(
                 client_order_id=tracked_order.client_order_id,
-                exchange_order_id=order_update_data["orderId"],
+                exchange_order_id=order_update_data["id"],
                 trading_pair=tracked_order.trading_pair,
                 update_timestamp=self.current_timestamp,
                 new_state=new_state,
@@ -547,6 +547,6 @@ class BitcoinRDExchange(ExchangePyBase):
     async def _get_last_traded_price(self, trading_pair: str) -> float:
         params = {"symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)}
 
-        resp_json = await self._api_request(path_url=CONSTANTS.TICKER_PATH_URL, method=RESTMethod.GET, params=params)
+        resp_json = await self._api_request(path_url=CONSTANTS.TICKER_PATH, method=RESTMethod.GET, params=params)
 
-        return float(resp_json["data"]["close"])
+        return float(resp_json["close"])
