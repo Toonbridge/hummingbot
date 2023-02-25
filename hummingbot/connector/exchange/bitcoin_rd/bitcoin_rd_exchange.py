@@ -92,11 +92,11 @@ class BitcoinRDExchange(ExchangePyBase):
 
     @property
     def trading_rules_request_path(self):
-        return CONSTANTS.PRODUCTS_PATH_URL
+        return CONSTANTS.TICKERS_PATH
 
     @property
     def trading_pairs_request_path(self):
-        return CONSTANTS.PRODUCTS_PATH_URL
+        return CONSTANTS.TICKERS_PATH
 
     @property
     def check_network_request_path(self):
