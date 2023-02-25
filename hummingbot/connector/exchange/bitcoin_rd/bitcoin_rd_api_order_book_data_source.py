@@ -10,6 +10,7 @@ from hummingbot.core.web_assistant.connections.data_types import RESTMethod, WSJ
 from hummingbot.core.web_assistant.web_assistants_factory import WebAssistantsFactory
 from hummingbot.core.web_assistant.ws_assistant import WSAssistant
 from hummingbot.logger import HummingbotLogger
+import time
 
 if TYPE_CHECKING:
     from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_exchange import BitcoinRDExchange
@@ -45,10 +46,10 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
 
         rest_assistant = await self._api_factory.get_rest_assistant()
         data = await rest_assistant.execute_request(
-            url=web_utils.public_rest_url(path_url=CONSTANTS.DEPTH_PATH_URL),
+            url=web_utils.public_rest_url(path_url=CONSTANTS.ORDERBOOK_PATH),
             params=params,
             method=RESTMethod.GET,
-            throttler_limit_id=CONSTANTS.DEPTH_PATH_URL,
+            throttler_limit_id=CONSTANTS.ORDERBOOK_PATH,
         )
 
         return data
@@ -76,18 +77,18 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
 
     async def _connected_websocket_assistant(self) -> WSAssistant:
         ws: WSAssistant = await self._api_factory.get_ws_assistant()
-        await ws.connect(ws_url=f"{CONSTANTS.WS_URL}/{CONSTANTS.STREAM_PATH_URL}")
+        await ws.connect(ws_url=f"{CONSTANTS.WS_URL}")
         return ws
 
     async def _order_book_snapshot(self, trading_pair: str) -> OrderBookMessage:
         snapshot_response: Dict[str, Any] = await self._request_order_book_snapshot(trading_pair)
-        snapshot_timestamp = float(snapshot_response["data"]["data"]["ts"]) / 1000
+        snapshot_timestamp =time.time()
 
         order_book_message_content = {
             "trading_pair": trading_pair,
             "update_id": snapshot_timestamp,
-            "bids": snapshot_response["data"]["data"]["bids"],
-            "asks": snapshot_response["data"]["data"]["asks"],
+            "bids": snapshot_response[trading_pair]["bids"],
+            "asks": snapshot_response[trading_pair]["asks"],
         }
         snapshot_msg: OrderBookMessage = OrderBookMessage(
             OrderBookMessageType.SNAPSHOT, order_book_message_content, snapshot_timestamp
@@ -98,7 +99,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
     async def _parse_trade_message(self, raw_message: Dict[str, Any], message_queue: asyncio.Queue):
         trading_pair = await self._connector.trading_pair_associated_to_exchange_symbol(symbol=raw_message["symbol"])
         for trade_data in raw_message["data"]:
-            timestamp: float = trade_data["ts"] / 1000
+            timestamp: float = time.time()
             message_content = {
                 "trade_id": timestamp,  # trade id isn't provided so using timestamp instead
                 "trading_pair": trading_pair,
@@ -113,8 +114,8 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             message_queue.put_nowait(trade_message)
 
     async def _parse_order_book_diff_message(self, raw_message: Dict[str, Any], message_queue: asyncio.Queue):
-        diff_data: Dict[str, Any] = raw_message["data"]
-        timestamp: float = diff_data["ts"] / 1000
+        diff_data: Dict[str, Any] = raw_message[trading_pair]
+        timestamp: float = time.time()
 
         trading_pair = await self._connector.trading_pair_associated_to_exchange_symbol(symbol=raw_message["symbol"])
 

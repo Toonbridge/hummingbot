@@ -11,7 +11,7 @@ from hummingbot.connector.exchange.bitcoin_rd import (
     bitcoin_rd_web_utils as web_utils,
 )
 from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_api_order_book_data_source import BitcoinRDAPIOrderBookDataSource
-from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_api_user_stream_data_source import (
+from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_api_user_steram_data_source import (
     BitcoinRDAPIUserStreamDataSource,
 )
 from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_auth import BitcoinRDAuth
@@ -125,7 +125,7 @@ class BitcoinRDExchange(ExchangePyBase):
         :return: the response from the tickers endpoint
         """
         symbol_to_trading_pair_map = await self.trading_pair_symbol_map()
-        pairs_prices = await self._api_get(path_url=CONSTANTS.TICKER_PATH_URL)
+        pairs_prices = await self._api_get(path_url=CONSTANTS.TICKER_PATH)
         spot_valid_token_entries = [
             data_dict for data_dict in pairs_prices["data"] if data_dict["symbol"] in symbol_to_trading_pair_map
         ]

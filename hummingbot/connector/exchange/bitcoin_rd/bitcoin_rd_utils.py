@@ -7,14 +7,13 @@ from hummingbot.client.config.config_data_types import BaseConnectorConfigMap, C
 from hummingbot.core.data_type.trade_fee import TradeFeeSchema
 
 CENTRALIZED = True
-EXAMPLE_PAIR = "ZRX-ETH"
+EXAMPLE_PAIR = "btc-usdt"
 
 DEFAULT_FEES = TradeFeeSchema(
     maker_percent_fee_decimal=Decimal("0.001"),
     taker_percent_fee_decimal=Decimal("0.001"),
     buy_percent_fee_deducted_from_returns=True
 )
-
 
 def is_exchange_information_valid(exchange_info: Dict[str, Any]) -> bool:
     """
