@@ -7,7 +7,7 @@ HBOT_ORDER_ID_PREFIX = "x-XEKWYICX"
 MAX_ORDER_ID_LEN = 32
 
 # Base URL
-REST_URL = "https://api.bitcoinrd.do/v2/"
+REST_URL = "https://api.bitcoinrd.do/v2"
 WS_URL = "https://api.bitcoinrd.do/stream"
 
 PUBLIC_API_VERSION = "v2"
