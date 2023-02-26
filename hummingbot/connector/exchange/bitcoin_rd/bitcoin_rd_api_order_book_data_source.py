@@ -149,7 +149,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         :param event_message: the event received through the websocket connection
         :param websocket_assistant: the websocket connection to use to interact with the exchange
         """
-        if event_message.get("m") == "ping":
+        if event_message.get("message") == "ping":
             pong_payloads = {"op": "pong"}
             pong_request = WSJSONRequest(payload=pong_payloads)
             await websocket_assistant.send(request=pong_request)

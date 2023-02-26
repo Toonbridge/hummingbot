@@ -22,11 +22,6 @@ class BitcoinRDAuth(AuthBase):
         the required parameter in the request header.
         :param request: the request to be configured for authenticated interaction
         """
-        if request.method == RESTMethod.POST:
-            request.data = self.add_auth_to_params(params=json.loads(request.data))
-        else:
-            request.params = self.add_auth_to_params(params=request.params)
-
         headers = {}
         if request.headers is not None:
             headers.update(request.headers)
