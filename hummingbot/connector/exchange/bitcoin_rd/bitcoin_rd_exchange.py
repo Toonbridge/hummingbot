@@ -46,7 +46,6 @@ class BitcoinRdExchange(ExchangePyBase):
         client_config_map: "ClientConfigAdapter",
         bitcoin_rd_api_key: str,
         bitcoin_rd_api_secret: str,
-        bitcoin_rd_group_id: str,
         trading_pairs: Optional[List[str]] = None,
         trading_required: bool = True,
     ):
@@ -59,7 +58,6 @@ class BitcoinRdExchange(ExchangePyBase):
         """
         self.bitcoin_rd_api_key = bitcoin_rd_api_key
         self.bitcoin_rd_api_secret = bitcoin_rd_api_secret
-        self.bitcoin_rd_group_id = bitcoin_rd_group_id
         self._trading_required = trading_required
         self._trading_pairs = trading_pairs
         super().__init__(client_config_map=client_config_map)
