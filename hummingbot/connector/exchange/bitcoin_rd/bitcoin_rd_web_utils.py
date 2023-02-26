@@ -35,7 +35,7 @@ def get_hb_id_headers() -> Dict[str, Any]:
     }
 
 
-def public_rest_url(path_url: str) -> str:
+def public_rest_url(path_url: str,  domain: str = CONSTANTS.DEFAULT_DOMAIN) -> str:
     """
     Creates a full URL for provided private REST endpoint
     :param path_url: a private REST endpoint
@@ -45,7 +45,7 @@ def public_rest_url(path_url: str) -> str:
     return CONSTANTS.REST_URL + path_url
 
 
-def private_rest_url(path_url: str) -> str:
+def private_rest_url(path_url: str,  domain: str = CONSTANTS.DEFAULT_DOMAIN) -> str:
     """
     Creates a full URL for provided private REST endpoint
     :param path_url: a private REST endpoint
