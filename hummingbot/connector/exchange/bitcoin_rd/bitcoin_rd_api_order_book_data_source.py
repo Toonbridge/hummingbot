@@ -13,7 +13,7 @@ from hummingbot.logger import HummingbotLogger
 import time
 
 if TYPE_CHECKING:
-    from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_exchange import BitcoinRDExchange
+    from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_exchange import BitcoinRdExchange
 
 
 class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
@@ -22,7 +22,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
     def __init__(
         self,
         trading_pairs: List[str],
-        connector: "BitcoinRDExchange",
+        connector: "BitcoinRdExchange",
         api_factory: Optional[WebAssistantsFactory] = None,
     ):
         super().__init__(trading_pairs)

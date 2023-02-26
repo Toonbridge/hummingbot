@@ -10,7 +10,7 @@ from hummingbot.core.web_assistant.ws_assistant import WSAssistant
 from hummingbot.logger import HummingbotLogger
 
 if TYPE_CHECKING:
-    from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_exchange import BitcoinRDExchange
+    from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_exchange import BitcoinRdExchange
 
 
 class BitcoinRDAPIUserStreamDataSource(UserStreamTrackerDataSource):
@@ -21,7 +21,7 @@ class BitcoinRDAPIUserStreamDataSource(UserStreamTrackerDataSource):
         self,
         auth: BitcoinRDAuth,
         trading_pairs: List[str],
-        connector: "BitcoinRDExchange",
+        connector: "BitcoinRdExchange",
         api_factory: WebAssistantsFactory,
     ):
         super().__init__()

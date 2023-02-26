@@ -31,9 +31,9 @@ if TYPE_CHECKING:
     from hummingbot.client.config.config_helpers import ClientConfigAdapter
 
 
-class BitcoinRDExchange(ExchangePyBase):
+class BitcoinRdExchange(ExchangePyBase):
     """
-    BitcoinRDExchange connects with BitcoinRD exchange and provides order book pricing, user account tracking and
+    BitcoinRdExchange connects with BitcoinRD exchange and provides order book pricing, user account tracking and
     trading functionality.
     """
 
