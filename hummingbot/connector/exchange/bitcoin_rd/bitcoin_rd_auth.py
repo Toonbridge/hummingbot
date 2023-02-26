@@ -36,7 +36,7 @@ class BitcoinRDAuth(AuthBase):
         """
         return request  # pass-through
 
-    def get_api_expires():
+    def get_api_expires(self):
         return str(int(time.time() + 60))
     
 
