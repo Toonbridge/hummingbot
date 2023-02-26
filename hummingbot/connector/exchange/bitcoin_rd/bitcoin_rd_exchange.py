@@ -1,5 +1,6 @@
 import asyncio
 from decimal import Decimal
+from select import select
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from bidict import bidict
@@ -135,6 +136,8 @@ class BitcoinRdExchange(ExchangePyBase):
         return False
 
     async def _api_request_url(self, path_url: str, is_auth_required: bool = False) -> str:
+        self.logger().warning("THIS IS THE PATH: ")
+        self.logger().info(path_url)
         url = await super()._api_request_url(path_url, is_auth_required)
         return url
 

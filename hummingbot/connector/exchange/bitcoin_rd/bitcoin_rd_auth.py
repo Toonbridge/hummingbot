@@ -25,7 +25,7 @@ class BitcoinRDAuth(AuthBase):
         headers = {}
         if request.headers is not None:
             headers.update(request.headers)
-        headers.update(self.auth_me(request.endpoint_url, request.method))
+        headers.update(self.auth_me(request.url, request.method))
         request.headers = headers
         return request
 

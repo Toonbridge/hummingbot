@@ -49,7 +49,6 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             url=web_utils.public_rest_url(path_url=CONSTANTS.ORDERBOOK_PATH),
             params=params,
             method=RESTMethod.GET,
-            throttler_limit_id=CONSTANTS.ORDERBOOK_PATH,
         )
         return data
 
