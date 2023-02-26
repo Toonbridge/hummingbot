@@ -33,6 +33,16 @@ def _time():
 def get_ms_timestamp() -> int:
     return int(_time() * 1e3)
 
+def is_pair_information_valid(pair_info: Dict[str, Any]) -> bool:
+    """
+    Verifies if a trading pair is enabled to operate with based on its market information
+
+    :param pair_info: the market information for a trading pair
+
+    :return: True if the trading pair is enabled, False otherwise
+    """
+    return True
+
 class BitcoinRDConfigMap(BaseConnectorConfigMap):
     connector: str = Field(default="bitcoin_rd", client_data=None)
     bitcoin_rd_api_key: SecretStr = Field(

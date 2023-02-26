@@ -40,8 +40,8 @@ class BitcoinRDAuth(AuthBase):
         return str(int(time.time() + 60))
     
 
-    def generate_signature(self, PATH_URL, METHOD, api_expires):
-        method, path, api_expires = self.init_signature(PATH_URL, METHOD)
+    def generate_signature(self, PATH_URL, METHOD, api_expires, is_ws):
+        method, path, api_expires = self.init_signature(PATH_URL, METHOD, is_ws)
         string_to_encode = method + path + api_expires
         signature = hmac.new(self.secret_key.encode(),string_to_encode.encode(),hashlib.sha256).hexdigest()
         return signature
@@ -61,7 +61,7 @@ class BitcoinRDAuth(AuthBase):
     def auth_me(self, PATH_URL, METHOD, is_ws=False):
         method, path, api_expires = self.init_signature(PATH_URL, METHOD, is_ws)
         api_expires = self.get_api_expires()
-        signature = self.generate_signature(PATH_URL, METHOD, api_expires)
+        signature = self.generate_signature(PATH_URL, METHOD, api_expires, is_ws)
         headers = {
             "api-key": self.api_key,
             "api-signature": signature,
