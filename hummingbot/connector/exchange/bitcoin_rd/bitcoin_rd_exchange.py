@@ -27,7 +27,7 @@ from hummingbot.core.utils.estimate_fee import build_trade_fee
 from hummingbot.core.web_assistant.connections.data_types import RESTMethod
 from hummingbot.core.web_assistant.web_assistants_factory import WebAssistantsFactory
 
-if TYPE_CHECKING:
+if True:
     from hummingbot.client.config.config_helpers import ClientConfigAdapter
 
 

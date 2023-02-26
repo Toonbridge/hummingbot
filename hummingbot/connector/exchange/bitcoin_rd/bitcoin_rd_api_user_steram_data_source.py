@@ -9,7 +9,7 @@ from hummingbot.core.web_assistant.web_assistants_factory import WebAssistantsFa
 from hummingbot.core.web_assistant.ws_assistant import WSAssistant
 from hummingbot.logger import HummingbotLogger
 
-if TYPE_CHECKING:
+if True:
     from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_exchange import BitcoinRdExchange
 
 

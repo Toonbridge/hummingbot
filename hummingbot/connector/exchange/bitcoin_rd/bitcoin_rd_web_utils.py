@@ -64,13 +64,3 @@ def build_api_factory(
     api_factory = WebAssistantsFactory(throttler=throttler, auth=auth, rest_pre_processors=[BitcoinRDRESTPreProcessor()])
     return api_factory
 
-
-def create_throttler() -> AsyncThrottler:
-    return AsyncThrottler(CONSTANTS.RATE_LIMITS)
-
-
-async def get_current_server_time(
-    throttler: Optional[AsyncThrottler] = None,
-    domain: str = CONSTANTS.DEFAULT_DOMAIN,
-) -> int:
-    return int(time.time() * 1e3)
