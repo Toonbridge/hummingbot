@@ -136,10 +136,6 @@ class BitcoinRdExchange(ExchangePyBase):
 
     async def _api_request_url(self, path_url: str, is_auth_required: bool = False) -> str:
         url = await super()._api_request_url(path_url, is_auth_required)
-
-        if is_auth_required:
-            url = url.format(group_id=self.bitcoin_rd_group_id)
-
         return url
 
     def _create_web_assistants_factory(self) -> WebAssistantsFactory:
