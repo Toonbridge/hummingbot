@@ -34,7 +34,7 @@ def get_ms_timestamp() -> int:
     return int(_time() * 1e3)
 
 class BitcoinRDConfigMap(BaseConnectorConfigMap):
-    connector: str = Field(default="bitcoin_rd", const=True, client_data=None)
+    connector: str = Field(default="bitcoin_rd", client_data=None)
     bitcoin_rd_api_key: SecretStr = Field(
         default=...,
         client_data=ClientFieldData(
