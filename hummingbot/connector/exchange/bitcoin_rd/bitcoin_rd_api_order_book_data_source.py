@@ -51,7 +51,6 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             method=RESTMethod.GET,
             throttler_limit_id=CONSTANTS.ORDERBOOK_PATH,
         )
-
         return data
 
     async def _subscribe_channels(self, ws: WSAssistant):
@@ -93,7 +92,6 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         snapshot_msg: OrderBookMessage = OrderBookMessage(
             OrderBookMessageType.SNAPSHOT, order_book_message_content, snapshot_timestamp
         )
-
         return snapshot_msg
 
     async def _parse_trade_message(self, raw_message: Dict[str, Any], message_queue: asyncio.Queue):
@@ -110,15 +108,12 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             trade_message: Optional[OrderBookMessage] = OrderBookMessage(
                 message_type=OrderBookMessageType.TRADE, content=message_content, timestamp=timestamp
             )
-
             message_queue.put_nowait(trade_message)
 
     async def _parse_order_book_diff_message(self, raw_message: Dict[str, Any], message_queue: asyncio.Queue):
         diff_data: Dict[str, Any] = raw_message[trading_pair]
         timestamp: float = time.time()
-
         trading_pair = await self._connector.trading_pair_associated_to_exchange_symbol(symbol=raw_message["symbol"])
-
         message_content = {
             "trading_pair": trading_pair,
             "update_id": timestamp,
@@ -126,7 +121,6 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             "asks": diff_data["asks"],
         }
         diff_message: OrderBookMessage = OrderBookMessage(OrderBookMessageType.DIFF, message_content, timestamp)
-
         message_queue.put_nowait(diff_message)
 
     def _channel_originating_message(self, event_message: Dict[str, Any]) -> str:

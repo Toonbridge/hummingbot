@@ -45,7 +45,7 @@ class BitcoinRdExchange(ExchangePyBase):
         self,
         client_config_map: "ClientConfigAdapter",
         bitcoin_rd_api_key: str,
-        bitcoin_rd_secret_key: str,
+        bitcoin_rd_api_secret: str,
         bitcoin_rd_group_id: str,
         trading_pairs: Optional[List[str]] = None,
         trading_required: bool = True,
@@ -58,7 +58,7 @@ class BitcoinRdExchange(ExchangePyBase):
         :param trading_required: Whether actual trading is needed.
         """
         self.bitcoin_rd_api_key = bitcoin_rd_api_key
-        self.bitcoin_rd_secret_key = bitcoin_rd_secret_key
+        self.bitcoin_rd_api_secret = bitcoin_rd_api_secret
         self.bitcoin_rd_group_id = bitcoin_rd_group_id
         self._trading_required = trading_required
         self._trading_pairs = trading_pairs
@@ -72,7 +72,7 @@ class BitcoinRdExchange(ExchangePyBase):
 
     @property
     def authenticator(self):
-        return BitcoinRDAuth(self.bitcoin_rd_api_key, self.bitcoin_rd_secret_key)
+        return BitcoinRDAuth(self.bitcoin_rd_api_key, self.bitcoin_rd_api_secret)
 
     @property
     def name(self) -> str:
