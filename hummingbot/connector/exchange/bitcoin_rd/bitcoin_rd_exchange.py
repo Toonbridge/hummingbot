@@ -358,9 +358,13 @@ class BitcoinRdExchange(ExchangePyBase):
     async def _update_balances(self):
         local_asset_names = set(self._account_balances.keys())
         remote_asset_names = set()
-
-        response = await self._api_get(path_url=CONSTANTS.GET_BALANCE_PATH, is_auth_required=True)
-
+        try:
+            response = await self._api_get(path_url=CONSTANTS.GET_BALANCE_PATH, is_auth_required=True)
+            self.logger().info("Response")
+            self.logger().info(response)
+        except Exception as e:
+            self.logger().info(e)
+        
         if True:
             for balance_entry in response:
                 asset_name = balance_entry.split("_")[0]
@@ -372,10 +376,12 @@ class BitcoinRdExchange(ExchangePyBase):
             for asset_name in asset_names_to_remove:
                 del self._account_available_balances[asset_name]
                 del self._account_balances[asset_name]
+    
         else:
             self.logger().error(f"There was an error during the balance request to BitcoinRD ({response})")
             raise IOError(f"Error requesting balances from BitcoinRD ({response})")
-
+        self.logger().info("ASSETS")
+        self.logger().info(remote_asset_names)
     async def _format_trading_rules(self, raw_trading_pair_info: Dict[str, Any]) -> List[TradingRule]:
         trading_rules = []
 
