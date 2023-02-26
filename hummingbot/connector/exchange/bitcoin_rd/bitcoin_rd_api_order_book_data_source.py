@@ -12,7 +12,7 @@ from hummingbot.core.web_assistant.ws_assistant import WSAssistant
 from hummingbot.logger import HummingbotLogger
 import time
 
-if TYPE_CHECKING:
+if True:
     from hummingbot.connector.exchange.bitcoin_rd.bitcoin_rd_exchange import BitcoinRdExchange
 
 
@@ -132,7 +132,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
     def _channel_originating_message(self, event_message: Dict[str, Any]) -> str:
         channel = ""
         if "data" in event_message:
-            event_channel = event_message.get("m")
+            event_channel = event_message.get("message")
             if event_channel == CONSTANTS.TRADE_TOPIC_ID:
                 channel = self._trade_messages_queue_key
             if event_channel == CONSTANTS.DIFF_TOPIC_ID:
