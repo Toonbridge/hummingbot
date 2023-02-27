@@ -125,6 +125,8 @@ class BitcoinRdExchange(ExchangePyBase):
         """
         symbol_to_trading_pair_map = await self.trading_pair_symbol_map()
         pairs_prices = await self._api_get(path_url=CONSTANTS.TICKERS_PATH)
+        self.logger().info("PAIRS")
+        self.logger().info(pairs_prices)
         spot_valid_token_entries = [
             data_dict for data_dict in pairs_prices if data_dict in symbol_to_trading_pair_map
         ]
@@ -369,7 +371,7 @@ class BitcoinRdExchange(ExchangePyBase):
             for balance_entry in response:
                 asset_name = balance_entry.split("_")[0]
                 self._account_available_balances[asset_name] = Decimal(response[f"{asset_name}_available"])
-                self._account_balances[asset_name] = Decimal(balance_entry[f"{asset_name}_balance"])
+                self._account_balances[asset_name] = Decimal(response[f"{asset_name}_balance"])
                 remote_asset_names.add(asset_name)
 
             asset_names_to_remove = local_asset_names.difference(remote_asset_names)
