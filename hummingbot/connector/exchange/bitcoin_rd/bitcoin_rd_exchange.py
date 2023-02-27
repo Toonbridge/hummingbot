@@ -184,11 +184,20 @@ class BitcoinRdExchange(ExchangePyBase):
 
     def _initialize_trading_pair_symbols_from_exchange_info(self, exchange_info: Dict[str, Any]):
         mapping = bidict()
-        for symbol_data in filter(utils.is_pair_information_valid, exchange_info.get("data", [])):
-            if len(symbol_data["symbol"].split("/")) == 2:
-                base, quote = symbol_data["symbol"].split("/")
-                mapping[symbol_data["symbol"]] = combine_to_hb_trading_pair(base, quote)
-        self._set_trading_pair_symbol_map(mapping)
+        self.logger().info("init")
+        try:
+            for symbol_data in filter(utils.is_pair_information_valid, exchange_info.get("data", [])):
+                self.logger().info("SYMBOL") 
+                self.logger().info(symbol_data)
+                if len(symbol_data["symbol"].split("/")) == 2:
+                    base, quote = symbol_data["symbol"].split("/")
+                    mapping[symbol_data["symbol"]] = combine_to_hb_trading_pair(base, quote)
+            self._set_trading_pair_symbol_map(mapping)
+            self.logger().info("mapping")
+            self.logger().info(mapping)
+        except Exception as e:
+            self.logger().info("Exception: ")
+            self.logger().info(e)
 
     async def _place_order(
         self,
