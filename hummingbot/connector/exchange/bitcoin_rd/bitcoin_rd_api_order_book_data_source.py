@@ -42,15 +42,18 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
 
         :return: the response from the exchange (JSON dictionary)
         """
-        params = {"symbol": await self._connector.exchange_symbol_associated_to_pair(trading_pair=trading_pair)}
+        self.logger().info("trading pair books: ")
+        self.logger().info(trading_pair)
+       
         self.logger().info("params")
         self.logger().info(params)
-        rest_assistant = await self._api_factory.get_rest_assistant()
-        data = await rest_assistant.execute_request(
-            url=web_utils.public_rest_url(path_url=CONSTANTS.ORDERBOOK_PATH),
-            params=params,
-            method=RESTMethod.GET,
-        )
+        params = {
+            "symbol": await self._connector.exchange_symbol_associated_to_pair(trading_pair=trading_pair),
+            "limit": "1000"
+        }
+        data = await self._connector._api_request(path_url=CONSTANTS.ORDERBOOK_PATH,
+                                                  method=RESTMethod.GET,
+                                                  params=params)
         self.logger().info("data snapshot:") 
         self.logger().info(data)
         return data
@@ -84,10 +87,10 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         return ws
 
     async def _order_book_snapshot(self, trading_pair: str) -> OrderBookMessage:
-
+        self.logger().info("orderbook")
         snapshot_response: Dict[str, Any] = await self._request_order_book_snapshot(trading_pair)
         snapshot_timestamp =time.time()
-
+        self.logger().info(snapshot_response)
         order_book_message_content = {
             "trading_pair": trading_pair,
             "update_id": snapshot_timestamp,
