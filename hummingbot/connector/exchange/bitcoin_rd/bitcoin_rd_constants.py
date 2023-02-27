@@ -8,6 +8,7 @@ MAX_ORDER_ID_LEN = 32
 
 # Base URL
 REST_URL = "https://api.bitcoinrd.do/v2"
+REST_URL_PRIVATE = "https://api.bitcoinrd.do/v2/user"
 WS_URL = "https://api.bitcoinrd.do/stream"
 
 PUBLIC_API_VERSION = "v2"
@@ -31,12 +32,13 @@ EXCHANGE_NAME = "BitcoinRD"
 # Private API endpoints for BitcoinRD function
 
 GET_USER_PATH = "/user"
-GET_BALANCE_PATH = "/balance"
+GET_BALANCE_PATH = "/user/balance"
 GET_DEPOSITS_PATH = "/deposits"
 GET_WITHDRAWALS_PATH = "/withdrawals"
 GET_WITHDRAWAL_FEE = "/withdrawal/fee"
 WITHDRAWAL = "/withdrawal"
 GET_TRADES = "/trades"
+GET_USER_TRADES = "/user/trades"
 GET_ALL_ORDERS = "/orders"
 GET_ORDER = "/order"
 CREATE_ORDER = "/order"

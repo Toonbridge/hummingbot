@@ -23,12 +23,23 @@ class BitcoinRDAuth(AuthBase):
         the required parameter in the request header.
         :param request: the request to be configured for authenticated interaction
         """
-        print("klk")
-        print(request)
+        _path = request.throttler_limit_id
+        _method = ""
+        if request.method == RESTMethod.GET:
+            _method = "GET"
+        elif request.method == RESTMethod.POST:
+            _method = "POST"
+        elif request.method == RESTMethod.PUT:
+            _method = "PUT"
+        elif request.method == RESTMethod.DELETE:
+            _method = "DELETE"
+
+        
         headers = {}
         if request.headers is not None:
             headers.update(request.headers)
-        headers.update(self.auth_me(request.url, request.method))
+        
+        headers.update(self.auth_me(_path, _method))
         request.headers = headers
         return request
 
@@ -57,7 +68,7 @@ class BitcoinRDAuth(AuthBase):
             return method, path, api_expires
         else:   
             method = METHOD
-            path = f"/v2/user{PATH_URL}"
+            path = f"/v2{PATH_URL}"
             api_expires = self.get_api_expires()
             return method, path, api_expires
 
