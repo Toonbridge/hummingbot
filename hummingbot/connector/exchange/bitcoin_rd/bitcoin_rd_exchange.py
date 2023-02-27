@@ -132,12 +132,6 @@ class BitcoinRdExchange(ExchangePyBase):
         # API documentation does not clarify the error message for timestamp related problems
         return False
 
-    async def _api_request_url(self, path_url: str, is_auth_required: bool = False) -> str:
-        self.logger().warning("THIS IS THE PATH: ")
-        self.logger().info(path_url)
-        url = await super()._api_request_url(path_url, is_auth_required)
-        return url
-
     def _create_web_assistants_factory(self) -> WebAssistantsFactory:
         return web_utils.build_api_factory(throttler=self._throttler, auth=self._auth)
 
