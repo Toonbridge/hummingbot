@@ -551,8 +551,8 @@ class BitcoinRdExchange(ExchangePyBase):
             raise IOError(f"Error requesting status for order {tracked_order.client_order_id} ({updated_order_data})")
 
     async def _get_last_traded_price(self, trading_pair: str) -> float:
+        self.logger().info("LAST")
         params = {"symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)}
-
         resp_json = await self._api_request(path_url=CONSTANTS.TICKER_PATH, method=RESTMethod.GET, params=params)
-
+        self.logger().info(resp_json)
         return float(resp_json["close"])
