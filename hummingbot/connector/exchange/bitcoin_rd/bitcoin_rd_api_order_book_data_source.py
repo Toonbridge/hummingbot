@@ -43,13 +43,16 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         :return: the response from the exchange (JSON dictionary)
         """
         params = {"symbol": await self._connector.exchange_symbol_associated_to_pair(trading_pair=trading_pair)}
-
+        self.logger().info("params")
+        self.logger().info(params)
         rest_assistant = await self._api_factory.get_rest_assistant()
         data = await rest_assistant.execute_request(
             url=web_utils.public_rest_url(path_url=CONSTANTS.ORDERBOOK_PATH),
             params=params,
             method=RESTMethod.GET,
         )
+        self.logger().info("data snapshot:") 
+        self.logger().info(data)
         return data
 
     async def _subscribe_channels(self, ws: WSAssistant):
@@ -59,6 +62,8 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         """
         try:
             for trading_pair in self._trading_pairs:
+                self.logger().info("trading pair")
+                self.logger().info(self._trading_pairs)
                 trading_symbol = await self._connector.exchange_symbol_associated_to_pair(trading_pair=trading_pair)
                 for topic in [CONSTANTS.DIFF_TOPIC_ID, CONSTANTS.TRADE_TOPIC_ID]:
                     payload = {"op": CONSTANTS.SUB_ENDPOINT_NAME, "args": f"{topic}:{trading_symbol}"}
@@ -79,6 +84,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         return ws
 
     async def _order_book_snapshot(self, trading_pair: str) -> OrderBookMessage:
+
         snapshot_response: Dict[str, Any] = await self._request_order_book_snapshot(trading_pair)
         snapshot_timestamp =time.time()
 
@@ -125,6 +131,8 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
     def _channel_originating_message(self, event_message: Dict[str, Any]) -> str:
         channel = ""
         if "data" in event_message:
+            self.logger().info("event")
+            self.logger().info(event_message)
             event_channel = event_message.get("message")
             if event_channel == CONSTANTS.TRADE_TOPIC_ID:
                 channel = self._trade_messages_queue_key
