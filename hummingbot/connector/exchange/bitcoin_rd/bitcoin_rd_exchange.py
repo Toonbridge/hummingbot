@@ -185,6 +185,7 @@ class BitcoinRdExchange(ExchangePyBase):
     def _initialize_trading_pair_symbols_from_exchange_info(self, exchange_info: Dict[str, Any]):
         mapping = bidict()
         self.logger().info("init")
+        self.logger.info(exchange_info)
         try:
             for symbol_data in filter(utils.is_pair_information_valid, exchange_info.get("data", [])):
                 self.logger().info("SYMBOL") 
