@@ -359,6 +359,8 @@ class BitcoinRdExchange(ExchangePyBase):
         if True:
             for balance_entry in response:
                 asset_name = balance_entry.split("_")[0]
+                if asset_name == "user":
+                    continue
                 self._account_available_balances[asset_name] = Decimal(response[f"{asset_name}_available"])
                 self._account_balances[asset_name] = Decimal(response[f"{asset_name}_balance"])
                 remote_asset_names.add(asset_name)
