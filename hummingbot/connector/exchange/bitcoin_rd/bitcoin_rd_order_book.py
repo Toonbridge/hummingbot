@@ -22,8 +22,10 @@ class BitcoinRDOrderBook(OrderBook):
         :param metadata: a dictionary with extra information to add to the snapshot data
         :return: a snapshot message with the snapshot information received from the exchange
         """
+        print("BOOOKS MSG")
         if metadata:
             msg.update(metadata)
+        print(msg)
         return OrderBookMessage(OrderBookMessageType.SNAPSHOT, {
             "trading_pair": msg["trading_pair"],
             "update_id": msg["lastUpdateId"],
@@ -43,8 +45,10 @@ class BitcoinRDOrderBook(OrderBook):
         :param metadata: a dictionary with extra information to add to the difference data
         :return: a diff message with the changes in the order book notified by the exchange
         """
+        print("BOOKS 2")
         if metadata:
             msg.update(metadata)
+        print(msg)
         return OrderBookMessage(OrderBookMessageType.DIFF, {
             "trading_pair": msg["trading_pair"],
             "first_update_id": msg["U"],
@@ -61,8 +65,10 @@ class BitcoinRDOrderBook(OrderBook):
         :param metadata: a dictionary with extra information to add to trade message
         :return: a trade message with the details of the trade as provided by the exchange
         """
+        print("trades")
         if metadata:
             msg.update(metadata)
+        print(msg)
         ts = msg["E"]
         return OrderBookMessage(OrderBookMessageType.TRADE, {
             "trading_pair": msg["trading_pair"],

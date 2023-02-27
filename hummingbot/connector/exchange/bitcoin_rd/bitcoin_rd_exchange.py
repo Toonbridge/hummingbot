@@ -188,14 +188,10 @@ class BitcoinRdExchange(ExchangePyBase):
         self.logger().info(exchange_info)
         try:
             for symbol_data in filter(utils.is_pair_information_valid, exchange_info):
-                self.logger().info("SYMBOL") 
-                self.logger().info(symbol_data)
                 if len(symbol_data.split("-")) == 2:
                     base, quote = symbol_data.split("-")
                     mapping[symbol_data] = combine_to_hb_trading_pair(base, quote)
             self._set_trading_pair_symbol_map(mapping)
-            self.logger().info("mapping")
-            self.logger().info(mapping)
         except Exception as e:
             self.logger().info("Exception: ")
             self.logger().info(e)
@@ -213,6 +209,7 @@ class BitcoinRdExchange(ExchangePyBase):
         side = trade_type.name.lower()
         order_type_str = "limit"
         timestamp = utils.get_ms_timestamp()
+        self.logger().info("PUT ORDER")
         data = {
             "time": timestamp,
             "size": str(amount),
@@ -374,7 +371,6 @@ class BitcoinRdExchange(ExchangePyBase):
                 self._account_available_balances[asset_name] = Decimal(response[f"{asset_name}_available"])
                 self._account_balances[asset_name] = Decimal(response[f"{asset_name}_balance"])
                 remote_asset_names.add(asset_name)
-
             asset_names_to_remove = local_asset_names.difference(remote_asset_names)
             for asset_name in asset_names_to_remove:
                 del self._account_available_balances[asset_name]
@@ -383,8 +379,6 @@ class BitcoinRdExchange(ExchangePyBase):
         else:
             self.logger().error(f"There was an error during the balance request to BitcoinRD ({response})")
             raise IOError(f"Error requesting balances from BitcoinRD ({response})")
-        self.logger().info("ASSETS")
-        self.logger().info(remote_asset_names)
     async def _format_trading_rules(self, raw_trading_pair_info: Dict[str, Any]) -> List[TradingRule]:
         trading_rules = []
 
@@ -415,8 +409,8 @@ class BitcoinRdExchange(ExchangePyBase):
             self._trading_fees = fees_json
         except asyncio.CancelledError:
             raise
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger().info(e)
 
     async def _all_trade_updates_for_order(self, order: InFlightOrder) -> List[TradeUpdate]:
         # BitcoinRD does not have an endpoint to retrieve trades for a particular order
@@ -459,52 +453,42 @@ class BitcoinRdExchange(ExchangePyBase):
 
         return trade_update
 
-    async def _all_trade_updates_for_orders(
-        self, orders: List[InFlightOrder], sequence_number: int
-    ) -> Tuple[List[TradeUpdate], int]:
-        # This endpoint determines the URL in an adhoc way because it is very different compare to the other endpoints
-        url = await self._api_request_url(path_url="")
-        balance_hist_url = url.replace("/v1/", f"/{CONSTANTS.BALANCE_HISTORY_PATH_URL}")
-        params = {"sn": sequence_number, "limit": 500}
+    async def _all_trade_updates_for_order(self, order: InFlightOrder) -> List[TradeUpdate]:
         trade_updates = []
-        orders_to_process = {order.exchange_order_id: order for order in orders if order.exchange_order_id is not None}
-        should_request_next_page = True
-        max_sequence_number = -1
+        if order.exchange_order_id is not None:
+            exchange_order_id = int(order.exchange_order_id)
+            trading_pair = await self.exchange_symbol_associated_to_pair(trading_pair=order.trading_pair)
+            all_fills_response = await self._api_get(
+                path_url=CONSTANTS.GET_USER_TRADES,
+                params={
+                    "symbol": trading_pair,
+                    "order_id": exchange_order_id
+                },
+                is_auth_required=True)
+            fills_data = all_fills_response.get("data", [])
+            if fills_data is not None:
+                for trade in fills_data:
+                    exchange_order_id = str(trade["order_id"])
+                    fee = TradeFeeBase.new_spot_fee(
+                        fee_schema=self.trade_fee_schema(),
+                        trade_type=order.trade_type,
+                        percent_token=trade["fee_coin"],
+                        flat_fees=[TokenAmount(amount=Decimal(trade["fee"]), token=trade["fee_coin"])]
+                    )
+                    trade_update = TradeUpdate(
+                        trade_id=str(trade["order_id"]),
+                        client_order_id=order.client_order_id,
+                        exchange_order_id=exchange_order_id,
+                        trading_pair=trading_pair,
+                        fee=fee,
+                        fill_base_amount=Decimal(trade["size"]),
+                        fill_quote_amount=Decimal(trade["price"]) * Decimal(trade["size"]),
+                        fill_price=Decimal(trade["price"]),
+                        fill_timestamp=time.time(),
+                    )
+                    trade_updates.append(trade_update)
 
-        # If there are many pages of result, query at most two pages each time, to not delay the update status loop
-        for _ in range(2):
-            result = await self._api_get(
-                path_url=CONSTANTS.BALANCE_HISTORY_PATH_URL,
-                params=params,
-                is_auth_required=True,
-                overwrite_url=balance_hist_url,
-            )
-
-            if "order" in result:
-                for order_fill_data in result["order"]:
-                    max_sequence_number = max(max_sequence_number, order_fill_data["sn"])
-                    if order_fill_data["order_id"] in orders_to_process:
-                        order_id = order_fill_data["order_id"]
-                        try:
-                            trade_update = self._trade_update_from_fill_data(
-                                fill_data=order_fill_data, order=orders_to_process[order_id]
-                            )
-                            trade_updates.append(trade_update)
-                        except asyncio.CancelledError:
-                            raise
-                        except Exception as request_error:
-                            self.logger().warning(
-                                f"Failed to fetch trade updates for order {order_id}. Error: {request_error}"
-                            )
-                params["sn"] = max_sequence_number
-                should_request_next_page = len(result["order"]) + len(result.get("balance", [])) == params["limit"]
-                if not should_request_next_page:
-                    break
-            else:
-                self.logger().warning(f"An error occurred when requesting order fills ({result})")
-                break
-
-        return trade_updates, max_sequence_number
+        return trade_updates
 
     async def _update_orders_fills(self, orders: List[InFlightOrder]):
         if orders:

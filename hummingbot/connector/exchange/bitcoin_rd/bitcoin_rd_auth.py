@@ -33,8 +33,6 @@ class BitcoinRDAuth(AuthBase):
             _method = "PUT"
         elif request.method == RESTMethod.DELETE:
             _method = "DELETE"
-
-        
         headers = {}
         if request.headers is not None:
             headers.update(request.headers)
@@ -48,7 +46,13 @@ class BitcoinRDAuth(AuthBase):
         This method is intended to configure a websocket request to be authenticated. BitcoinRD does not use this
         functionality
         """
-        return request  # pass-through
+        headers = {}
+        if request.headers is not None:
+            headers.update(request.headers)
+        
+        headers.update(self.auth_me("ok", "ok", is_ws=True))
+        request.headers = headers
+        return request
 
     def get_api_expires(self):
         return str(int(time.time() + 60))

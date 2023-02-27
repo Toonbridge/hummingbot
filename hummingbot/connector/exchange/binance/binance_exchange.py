@@ -524,11 +524,13 @@ class BinanceExchange(ExchangePyBase):
         params = {
             "symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)
         }
-
+        self.logger().info("PARAMETROS SYMBOL")
+        self.logger().info(params)
         resp_json = await self._api_request(
             method=RESTMethod.GET,
             path_url=CONSTANTS.TICKER_PRICE_CHANGE_PATH_URL,
             params=params
         )
-
+        self.logger().info("RESP JSON")
+        self.logger().info(resp_json)
         return float(resp_json["lastPrice"])
