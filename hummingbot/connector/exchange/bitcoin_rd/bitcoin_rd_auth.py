@@ -1,3 +1,4 @@
+
 import hashlib
 import hmac
 import json
@@ -22,6 +23,8 @@ class BitcoinRDAuth(AuthBase):
         the required parameter in the request header.
         :param request: the request to be configured for authenticated interaction
         """
+        print("klk")
+        print(request)
         headers = {}
         if request.headers is not None:
             headers.update(request.headers)
