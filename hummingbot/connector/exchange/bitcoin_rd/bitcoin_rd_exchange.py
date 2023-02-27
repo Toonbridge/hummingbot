@@ -187,12 +187,12 @@ class BitcoinRdExchange(ExchangePyBase):
         self.logger().info("init")
         self.logger().info(exchange_info)
         try:
-            for symbol_data in filter(utils.is_pair_information_valid, exchange_info.get("data", [])):
+            for symbol_data in filter(utils.is_pair_information_valid, exchange_info):
                 self.logger().info("SYMBOL") 
                 self.logger().info(symbol_data)
-                if len(symbol_data["symbol"].split("/")) == 2:
-                    base, quote = symbol_data["symbol"].split("/")
-                    mapping[symbol_data["symbol"]] = combine_to_hb_trading_pair(base, quote)
+                if len(symbol_data.split("-")) == 2:
+                    base, quote = symbol_data.split("-")
+                    mapping[symbol_data] = combine_to_hb_trading_pair(base, quote)
             self._set_trading_pair_symbol_map(mapping)
             self.logger().info("mapping")
             self.logger().info(mapping)
