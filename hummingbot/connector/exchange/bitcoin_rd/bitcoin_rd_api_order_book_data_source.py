@@ -48,8 +48,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         self.logger().info("params")
         self.logger().info(params)
         params = {
-            "symbol": await self._connector.exchange_symbol_associated_to_pair(trading_pair=trading_pair),
-            "limit": "1000"
+            "symbol": await self._connector.exchange_symbol_associated_to_pair(trading_pair=trading_pair)
         }
         data = await self._connector._api_request(path_url=CONSTANTS.ORDERBOOK_PATH,
                                                   method=RESTMethod.GET,
@@ -103,6 +102,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         return snapshot_msg
 
     async def _parse_trade_message(self, raw_message: Dict[str, Any], message_queue: asyncio.Queue):
+        self.logger().info("TRADE MESSAGE")
         trading_pair = await self._connector.trading_pair_associated_to_exchange_symbol(symbol=raw_message["symbol"])
         for trade_data in raw_message["data"]:
             timestamp: float = time.time()
@@ -119,6 +119,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             message_queue.put_nowait(trade_message)
 
     async def _parse_order_book_diff_message(self, raw_message: Dict[str, Any], message_queue: asyncio.Queue):
+        self.logger().info("TRADE MESSAGE 2 ")
         diff_data: Dict[str, Any] = raw_message[trading_pair]
         timestamp: float = time.time()
         trading_pair = await self._connector.trading_pair_associated_to_exchange_symbol(symbol=raw_message["symbol"])
@@ -132,6 +133,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         message_queue.put_nowait(diff_message)
 
     def _channel_originating_message(self, event_message: Dict[str, Any]) -> str:
+        self.logger().info("TRADE MESSAGE 3")
         channel = ""
         if "data" in event_message:
             self.logger().info("event")
@@ -153,6 +155,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         :param event_message: the event received through the websocket connection
         :param websocket_assistant: the websocket connection to use to interact with the exchange
         """
+        self.logger().info("CH MESSAGE")
         if event_message.get("message") == "ping":
             pong_payloads = {"op": "pong"}
             pong_request = WSJSONRequest(payload=pong_payloads)
