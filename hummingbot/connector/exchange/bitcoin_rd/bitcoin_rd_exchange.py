@@ -123,14 +123,9 @@ class BitcoinRdExchange(ExchangePyBase):
 
         :return: the response from the tickers endpoint
         """
-        symbol_to_trading_pair_map = await self.trading_pair_symbol_map()
         pairs_prices = await self._api_get(path_url=CONSTANTS.TICKERS_PATH)
         self.logger().info("PAIRS")
         self.logger().info(pairs_prices)
-        spot_valid_token_entries = [
-            data_dict for data_dict in pairs_prices if data_dict in symbol_to_trading_pair_map
-        ]
-        pairs_prices = spot_valid_token_entries
         return pairs_prices
 
     def _is_request_exception_related_to_time_synchronizer(self, request_exception: Exception):
