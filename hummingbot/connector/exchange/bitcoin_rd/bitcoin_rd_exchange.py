@@ -99,7 +99,7 @@ class BitcoinRdExchange(ExchangePyBase):
 
     @property
     def check_network_request_path(self):
-        return CONSTANTS.SERVER_LIMIT_INFO
+        return "ping/"
 
     @property
     def trading_pairs(self):

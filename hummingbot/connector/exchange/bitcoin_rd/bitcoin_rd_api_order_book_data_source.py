@@ -43,7 +43,6 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
         :return: the response from the exchange (JSON dictionary)
         """
         self.logger().info("trading pair books: ")
-        ok
         self.logger().info(trading_pair)
        
         self.logger().info("params")
