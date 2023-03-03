@@ -213,7 +213,6 @@ class BitcoinRdExchange(ExchangePyBase):
         data = {
             "time": timestamp,
             "size": str(amount),
-            "id": order_id,
             "side": side,
             "symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair),
             "type": order_type_str,
