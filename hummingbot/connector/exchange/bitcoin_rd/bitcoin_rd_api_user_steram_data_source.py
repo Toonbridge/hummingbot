@@ -32,11 +32,15 @@ class BitcoinRDAPIUserStreamDataSource(UserStreamTrackerDataSource):
         self._last_ws_message_sent_timestamp = 0
 
     async def _connected_websocket_assistant(self) -> WSAssistant:
-        headers = self._bitcoin_rd_auth.auth_me("ok", "ok", is_ws=True)
-        ws_url = f"{CONSTANTS.WS_URL}"
-        ws: WSAssistant = await self._api_factory.get_ws_assistant()
-        await ws.connect(ws_url=ws_url, ws_headers=headers)
-        return ws
+        self.logger().info("WS AUTH")
+        try:
+            headers = self._bitcoin_rd_auth.auth_me("ok", "ok", is_ws=True)
+            ws_url = f"{CONSTANTS.WS_URL}"
+            ws: WSAssistant = await self._api_factory.get_ws_assistant()
+            await ws.connect(ws_url=ws_url, ws_headers=headers)
+            return ws
+        except Exception as e:
+            self.logger().info(e)
 
     async def _subscribe_channels(self, websocket_assistant: WSAssistant):
         """
