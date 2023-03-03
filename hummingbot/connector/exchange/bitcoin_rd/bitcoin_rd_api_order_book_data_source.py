@@ -81,6 +81,7 @@ class BitcoinRDAPIOrderBookDataSource(OrderBookTrackerDataSource):
             raise
 
     async def _connected_websocket_assistant(self) -> WSAssistant:
+        self.logger().info("WS: ==")
         ws: WSAssistant = await self._api_factory.get_ws_assistant()
         await ws.connect(ws_url=f"{CONSTANTS.WS_URL}")
         return ws
