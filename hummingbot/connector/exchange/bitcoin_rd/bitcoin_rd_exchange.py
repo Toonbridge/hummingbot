@@ -1,5 +1,6 @@
 import asyncio
 from decimal import Decimal
+import json
 from select import select
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
@@ -212,17 +213,17 @@ class BitcoinRdExchange(ExchangePyBase):
         self.logger().info("PUT ORDER")
         data = {
             "time": timestamp,
-            "size": str(amount),
+            "size": float(amount),
             "side": side,
             "symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair),
             "type": order_type_str,
-            "price": str(price),
+            "price": float(price),
         }
         if order_type is OrderType.LIMIT_MAKER:
             data["meta.post_only"] = True
         exchange_order = await self._api_post(
             path_url=CONSTANTS.CREATE_ORDER,
-            data=data,
+            json=data,
             is_auth_required=True,
         )
 
@@ -244,7 +245,7 @@ class BitcoinRdExchange(ExchangePyBase):
         }
         cancel_result = await self._api_delete(
             path_url=CONSTANTS.CANCEL_ORDER,
-            data=data,
+            json=data,
             is_auth_required=True,
         )
         if cancel_result.get("code") == 0:
@@ -536,6 +537,6 @@ class BitcoinRdExchange(ExchangePyBase):
     async def _get_last_traded_price(self, trading_pair: str) -> float:
         self.logger().info("LAST")
         params = {"symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)}
-        resp_json = await self._api_request(path_url=CONSTANTS.TICKER_PATH, method=RESTMethod.GET, params=params)
+        resp_json = await self._api_request(path_url=CONSTANTS.TICKER_PATH, method=RESTMethod.GET, json=params)
         self.logger().info(resp_json)
         return float(resp_json["close"])

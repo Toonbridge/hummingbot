@@ -23,6 +23,8 @@ class BitcoinRDAuth(AuthBase):
         the required parameter in the request header.
         :param request: the request to be configured for authenticated interaction
         """
+        print("REQUEST")
+        print(request)
         _path = request.throttler_limit_id
         _method = ""
         if request.method == RESTMethod.GET:
@@ -58,9 +60,11 @@ class BitcoinRDAuth(AuthBase):
         return str(int(time.time() + 60))
     
 
-    def generate_signature(self, PATH_URL, METHOD, api_expires, is_ws):
+    def generate_signature(self, PATH_URL, METHOD, api_expires, is_ws, params=None):
         method, path, api_expires = self.init_signature(PATH_URL, METHOD, is_ws)
         string_to_encode = method + path + api_expires
+        if params != None:
+            string_to_encode += json.dumps(params, separators=(',', ':'))
         signature = hmac.new(self.secret_key.encode(),string_to_encode.encode(),hashlib.sha256).hexdigest()
         return signature
 
@@ -76,10 +80,10 @@ class BitcoinRDAuth(AuthBase):
             api_expires = self.get_api_expires()
             return method, path, api_expires
 
-    def auth_me(self, PATH_URL, METHOD, is_ws=False):
+    def auth_me(self, PATH_URL, METHOD, is_ws=False, params=None):
         method, path, api_expires = self.init_signature(PATH_URL, METHOD, is_ws)
         api_expires = self.get_api_expires()
-        signature = self.generate_signature(PATH_URL, METHOD, api_expires, is_ws)
+        signature = self.generate_signature(PATH_URL, METHOD, api_expires, is_ws, params=None)
         headers = {
             "api-key": self.api_key,
             "api-signature": signature,
