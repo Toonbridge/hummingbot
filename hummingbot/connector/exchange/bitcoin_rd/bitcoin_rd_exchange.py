@@ -192,15 +192,15 @@ class BitcoinRdExchange(ExchangePyBase):
                 if len(symbol_data.split("-")) == 2:
                     base, quote = symbol_data.split("-")
                     mapping[symbol_data] = combine_to_hb_trading_pair(base, quote)
-                    self.logger().info("T MAPPING")
-                    self.logger().info(mapping)
+                   
             self._set_trading_pair_symbol_map(mapping)
           
-      
+        
         except Exception as e:
             self.logger().info("Exception: ")
             self.logger().info(e)
         self.logger().info("NOT MAPPING")
+        self.logger().info(mapping)
 
     async def _place_order(
         self,
@@ -367,8 +367,6 @@ class BitcoinRdExchange(ExchangePyBase):
         remote_asset_names = set()
         try:
             response = await self._api_get(path_url=CONSTANTS.GET_BALANCE_PATH, is_auth_required=True)
-            self.logger().info("Response")
-            self.logger().info(response)
         except Exception as e:
             self.logger().info(e)
         
@@ -384,10 +382,12 @@ class BitcoinRdExchange(ExchangePyBase):
             for asset_name in asset_names_to_remove:
                 del self._account_available_balances[asset_name]
                 del self._account_balances[asset_name]
-    
+        
         else:
             self.logger().error(f"There was an error during the balance request to BitcoinRD ({response})")
             raise IOError(f"Error requesting balances from BitcoinRD ({response})")
+        self.logger().info("Balance")
+        self.logger().info(remote_asset_names)
     async def _format_trading_rules(self, raw_trading_pair_info: Dict[str, Any]) -> List[TradingRule]:
         trading_rules = []
         self.logger().info("TRADING RULES here")
@@ -409,6 +409,7 @@ class BitcoinRdExchange(ExchangePyBase):
         return trading_rules
 
     async def _update_trading_fees(self):
+        self.logger().info("TRADING")
         resp = await self._api_get(
             path_url=CONSTANTS.TIERS_PATH,
             is_auth_required=True,

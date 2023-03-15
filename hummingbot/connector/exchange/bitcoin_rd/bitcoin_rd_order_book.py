@@ -45,7 +45,6 @@ class BitcoinRDOrderBook(OrderBook):
         :param metadata: a dictionary with extra information to add to the difference data
         :return: a diff message with the changes in the order book notified by the exchange
         """
-        print("BOOKS 2")
         if metadata:
             msg.update(metadata)
         print(msg)
