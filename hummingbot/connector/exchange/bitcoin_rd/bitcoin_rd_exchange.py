@@ -214,11 +214,12 @@ class BitcoinRdExchange(ExchangePyBase):
         order_type_str = "limit"
         timestamp = utils.get_ms_timestamp()
         self.logger().info("PUT ORDER")
+        symbol = await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)
         data = {
             "time": timestamp,
             "size": float(amount),
             "side": side,
-            "symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair),
+            "symbol": symbol,
             "type": order_type_str,
             "price": float(price),
         }
