@@ -38,8 +38,10 @@ class BitcoinRDAuth(AuthBase):
         headers = {}
         if request.headers is not None:
             headers.update(request.headers)
-        
-        headers.update(self.auth_me(_path, _method))
+        if _method == "POST" or _method == "DELETE":
+             headers.update(self.auth_me(_path, _method, params=request.params))
+        else:
+            headers.update(self.auth_me(_path, _method))
         request.headers = headers
         return request
 
