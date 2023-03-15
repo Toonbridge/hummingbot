@@ -193,6 +193,7 @@ class BitcoinRdExchange(ExchangePyBase):
                     base, quote = symbol_data.split("-")
                     mapping[symbol_data] = combine_to_hb_trading_pair(base, quote)
                     self.logger().info("T MAPPING")
+                    self.logger().info(mapping)
             self._set_trading_pair_symbol_map(mapping)
           
       
