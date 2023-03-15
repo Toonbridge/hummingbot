@@ -390,7 +390,7 @@ class BitcoinRdExchange(ExchangePyBase):
             raise IOError(f"Error requesting balances from BitcoinRD ({response})")
     async def _format_trading_rules(self, raw_trading_pair_info: Dict[str, Any]) -> List[TradingRule]:
         trading_rules = []
-
+        self.logger().info("TRADING RULES here")
         for info in filter(utils.is_pair_information_valid, raw_trading_pair_info.get("data", [])):
             try:
                 trading_pair = await self.trading_pair_associated_to_exchange_symbol(symbol=info.get("symbol"))
@@ -545,6 +545,7 @@ class BitcoinRdExchange(ExchangePyBase):
 
     async def _get_last_traded_price(self, trading_pair: str) -> float:
         self.logger().info("LAST")
+        self.logger().info("init here")
         params = {"symbol": await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)}
         resp_json = await self._api_request(path_url=CONSTANTS.TICKER_PATH, method=RESTMethod.GET, json=params)
         self.logger().info(resp_json)
