@@ -193,9 +193,12 @@ class BitcoinRdExchange(ExchangePyBase):
                     base, quote = symbol_data.split("-")
                     mapping[symbol_data] = combine_to_hb_trading_pair(base, quote)
             self._set_trading_pair_symbol_map(mapping)
+            self.logger().info("T MAPPING")
+      
         except Exception as e:
             self.logger().info("Exception: ")
             self.logger().info(e)
+        self.logger().info("NOT MAPPING")
 
     async def _place_order(
         self,
