@@ -192,8 +192,9 @@ class BitcoinRdExchange(ExchangePyBase):
                 if len(symbol_data.split("-")) == 2:
                     base, quote = symbol_data.split("-")
                     mapping[symbol_data] = combine_to_hb_trading_pair(base, quote)
+                    self.logger().info("T MAPPING")
             self._set_trading_pair_symbol_map(mapping)
-            self.logger().info("T MAPPING")
+          
       
         except Exception as e:
             self.logger().info("Exception: ")
@@ -215,6 +216,8 @@ class BitcoinRdExchange(ExchangePyBase):
         timestamp = utils.get_ms_timestamp()
         self.logger().info("PUT ORDER")
         symbol = await self.exchange_symbol_associated_to_pair(trading_pair=trading_pair)
+        self.logger().info("SYMBOL")
+        self.logger().info(symbol)
         data = {
             "time": timestamp,
             "size": float(amount),
@@ -262,6 +265,7 @@ class BitcoinRdExchange(ExchangePyBase):
         stream data source. It keeps reading events from the queue until the task is interrupted.
         The events received are balance updates, order updates and trade events.
         """
+        self.logger().info("user event")
         async for event_message in self._iter_user_event_queue():
             try:
                 acct_type = event_message.get("ac")
